@@ -31,10 +31,8 @@ add_executable (mbusd
         ./src/util/util.cpp
         ./src/server/connection.cpp
         ./src/server/connection_manager.cpp
-        ./src/server/mime_types.cpp
-        ./src/server/reply.cpp
-        ./src/server/request_handler.cpp
-        ./src/server/request_parser.cpp
+        ./src/server/message_handler.cpp
+        ./src/server/message_parser.cpp
         ./src/server/server.cpp
         )
 
