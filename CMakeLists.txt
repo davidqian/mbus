@@ -12,7 +12,9 @@ set (mbus_VERSION_MAJOR 1)
 set (mbus_VERSION_MINOR 0)
 
 include_directories (".")
-include_directories ("./src")
+include_directories ("./src/server")
+include_directories ("./src/client")
+include_directories ("./src/util")
 
 include_directories ("./third_party/boost_1_57_0")
 
@@ -25,7 +27,15 @@ ${CMAKE_CXX_FLAGS_DEBUG}
 )
 
 add_executable (mbusd
-        ./src/mbus.cpp
+        ./src/server/mbus.cpp
+        ./src/util/util.cpp
+        ./src/server/connection.cpp
+        ./src/server/connection_manager.cpp
+        ./src/server/mime_types.cpp
+        ./src/server/reply.cpp
+        ./src/server/request_handler.cpp
+        ./src/server/request_parser.cpp
+        ./src/server/server.cpp
         )
 
 if(${CMAKE_HOST_SYSTEM_NAME} MATCHES "Darwin")
