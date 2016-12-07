@@ -10,6 +10,7 @@
 
 #ifndef MBUS_UTIL_HPP
 #define MBUS_UTIL_HPP
+#include <string>
 
 namespace mbus {
     namespace util {

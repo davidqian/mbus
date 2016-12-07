@@ -9,7 +9,8 @@
 
 namespace mbus {
     namespace util {
-    	int ip2long(string ip)
+
+    	int ip2long(std::string ip)
     	{
     		std::vector<std::string> ip_elems = split(ip, ".");
     		int long_ip = 0;
@@ -42,6 +43,7 @@ namespace mbus {
 		        pos = find_pos + delim_len;  
 		    }  
 		    return elems;  
-		}  
+		}
+
     } // namespace util
 } // namespace mbus
