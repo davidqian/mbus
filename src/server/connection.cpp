@@ -13,8 +13,9 @@
 #include <vector>
 #include "connection_manager.hpp"
 #include "message_handler.hpp"
+#include "../util/util.hpp";
 
-namespace http {
+namespace mbus {
     namespace server {
 
         connection::connection(boost::asio::ip::tcp::socket socket,
@@ -45,11 +46,22 @@ namespace http {
                                         {
                                             message_parser::result_type result;
                                             std::tie(result, std::ignore) = message_parser_.parse(
-                                                    request_, buffer_.data(), buffer_.data() + bytes_transferred);
+                                                    msg_, buffer_.data(), buffer_.data() + bytes_transferred);
 
                                             if (result == message_parser::good)
                                             {
-                                                //todo 
+                                                message_parser_.state_ = message_parser_.header;
+                                                connection_ptr to_conn;
+                                                connection_manager_.find(msg_.ip, to_conn);
+                                                if(to_conn != nullptr){
+                                                    try{
+                                                        int remote_ip = util::ip2long(socket_.remote_endpoint.address().to_string());
+                                                        to_conn.do_write(toBuffer(msg_, remote_ip));
+                                                        do_read();
+                                                    }catch (std::exception& e){
+                                                        stop();
+                                                    }
+                                                }
                                             }
                                             else if (result == request_parser::bad)
                                             {

@@ -42,11 +42,11 @@ namespace mbus {
             {
                 while (begin != end)
                 {
-                    if (state_ == length_end) {
-                        msg.data += std::string(begin, end);
-                        if (msg.data.length() < msg.data_length - 4) {
+                    if (state_ == ip_end) {
+                        msg.data = std::string(begin, end);
+                        if (msg.data.length() < msg.data_length) {
                             return std::make_tuple(indeterminate, begin);
-                        } else if (msg.data.length() > msg.data_length - 4) {
+                        } else if (msg.data.length() > msg.data_length) {
                             return std::make_tuple(bad, begin);
                         } else {
                             return std::make_tuple(good, begin);
@@ -72,11 +72,10 @@ namespace mbus {
             /// The current state of the parser.
             enum state
             {
-                header_start,
-                id_start,
-                ip_start,
+                header,
                 length_start,
-                length_end
+                ip_start,
+                ip_end
             } state_;
         };
 

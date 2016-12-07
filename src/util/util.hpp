@@ -8,15 +8,14 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef MBUS_TOOLS_HPP
-#define MBUS_TOOLS_HPP
-
-#include <string>
+#ifndef MBUS_UTIL_HPP
+#define MBUS_UTIL_HPP
 
 namespace mbus {
-    namespace server {
-    	int ip2long(string ip);
-    } // namespace server
+    namespace util {
+    	int ip2long(std::string ip);
+    	std::vector<std::string> split(const std::string& s, const std::string& delim);
+    } // namespace util
 } // namespace mbus
 
-#endif // MBUS_TOOLS_HPP
+#endif // MBUS_UTIL_HPP

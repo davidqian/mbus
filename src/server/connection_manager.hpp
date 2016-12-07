@@ -43,7 +43,7 @@ namespace mbus {
 
         private:
             /// The managed connections.
-            std::map<int long_ip, connection_ptr> connections_;
+            std::map<int, connection_ptr> connections_;
         };
 
     } // namespace server

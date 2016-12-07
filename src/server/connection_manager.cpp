@@ -9,6 +9,7 @@
 //
 
 #include "connection_manager.hpp"
+#include "../util/util.hpp"
 
 namespace mbus {
     namespace server {
@@ -21,7 +22,7 @@ namespace mbus {
         {
             int remote_ip;
             try{
-                remote_ip = c.socket_.remote_endpoint.address().to_string();
+                remote_ip = util::ip2long(c.socket_.remote_endpoint.address().to_string());
                 connections_[remote_ip] = c;
                 c->start();
             }catch (std::exception& e){
@@ -29,16 +30,21 @@ namespace mbus {
             }
         }
 
-        connection_ptr connection_manager::find(int ip)
+        void connection_manager::find(int ip, connection_ptr &conn)
         {
-
+            conn = nullptr;
+            map<int, connection_ptr>::iterator iter;
+            iter = connections_.find(ip);
+            if(iter != connections_.end()){
+                conn = iter->second;
+            }
         }
 
         void connection_manager::stop(connection_ptr c)
         {
             std::string remote_ip;
             try{
-                remote_ip = c.socket_.remote_endpoint.address().to_string();
+                remote_ip = util::ip2long(c.socket_.remote_endpoint.address().to_string());
                 connections_.erase(remote_ip);
             }catch (std::exception& e){
                 
@@ -48,7 +54,7 @@ namespace mbus {
 
         void connection_manager::stop_all()
         {
-            map<string,connection_ptr>::iterator it;
+            map<int,connection_ptr>::iterator it;
             for(it=connections_.begin(); it!=connections_.end(); ++it) {
                 it->second->stop();
             }
