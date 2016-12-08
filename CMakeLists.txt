@@ -27,12 +27,13 @@ ${CMAKE_CXX_FLAGS_DEBUG}
 )
 
 add_executable (mbusd
-        ./src/server/mbus.cpp
+        ./src/mbus.cpp
         ./src/util/util.cpp
         ./src/server/connection.cpp
         ./src/server/connection_manager.cpp
         ./src/server/message_handler.cpp
         ./src/server/message_parser.cpp
+	    ./src/server/message_encode.cpp
         ./src/server/server.cpp
         )
 
