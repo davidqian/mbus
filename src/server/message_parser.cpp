@@ -51,7 +51,7 @@ namespace mbus {
                         msg.data_length_chars += 1;
                         if(msg.data_length_chars == 4){
                             msg.data_length = std::stoi(msg.data_length_str);
-                            msg.data_length_chars == 0;
+                            msg.data_length_chars = 0;
                             msg.data_length_str = "";
                             state_ = ip_start;
                         }
@@ -68,7 +68,7 @@ namespace mbus {
                         msg.ip_chars += 1;
                         if(msg.ip_chars == 4){
                             msg.ip = std::stoi(msg.ip_str);
-                            msg.ip_chars == 0;
+                            msg.ip_chars = 0;
                             msg.ip_str = "";
                             state_ = ip_end;
                         }

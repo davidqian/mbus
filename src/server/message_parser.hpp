@@ -53,21 +53,13 @@ namespace mbus {
                         }
                     }
 
-                    result_type result = consume(req, *begin++);
+                    result_type result = consume(msg, *begin++);
                     if (result == bad) {
                         return std::make_tuple(bad, begin);
                     }
                 }
                 return std::make_tuple(indeterminate, begin);
-            }
-
-        private:
-            /// Handle the next character of input.
-            result_type consume(message& msg, char input);
-
-            static bool is_header(char c);
-
-            static bool is_char(int c);
+            };
 
             /// The current state of the parser.
             enum state
@@ -77,6 +69,15 @@ namespace mbus {
                 ip_start,
                 ip_end
             } state_;
+
+        private:
+            /// Handle the next character of input.
+            result_type consume(message& msg, char input);
+
+            static bool is_header(char c);
+
+            static bool is_char(int c);
+
         };
 
     } // namespace server

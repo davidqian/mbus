@@ -13,11 +13,12 @@
 
 #include <array>
 #include <memory>
+#include <vector>
 #include <boost/asio.hpp>
-#include "reply.hpp"
 #include "message.hpp"
 #include "message_handler.hpp"
 #include "message_parser.hpp"
+#include "../util/util.hpp"
 
 namespace mbus {
     namespace server {
@@ -42,12 +43,14 @@ namespace mbus {
             /// Stop all asynchronous operations associated with the connection.
             void stop();
 
+	    int get_remote_ip();
+
         private:
             /// Perform an asynchronous read operation.
             void do_read();
 
             /// Perform an asynchronous write operation.
-            void do_write();
+            void do_write(std::vector<boost::asio::const_buffer> buf);
 
             /// Socket for the connection.
             boost::asio::ip::tcp::socket socket_;

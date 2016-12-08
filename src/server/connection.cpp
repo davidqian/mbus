@@ -13,7 +13,8 @@
 #include <vector>
 #include "connection_manager.hpp"
 #include "message_handler.hpp"
-#include "../util/util.hpp";
+#include "message.hpp"
+#include "message_encode.hpp"
 
 namespace mbus {
     namespace server {
@@ -55,15 +56,15 @@ namespace mbus {
                                                 connection_manager_.find(msg_.ip, to_conn);
                                                 if(to_conn != nullptr){
                                                     try{
-                                                        int remote_ip = util::ip2long(socket_.remote_endpoint.address().to_string());
-                                                        to_conn.do_write(toBuffer(msg_, remote_ip));
+                                                        int remote_ip = get_remote_ip();
+                                                        to_conn->do_write(message_encode::to_buffers(msg_, remote_ip));
                                                         do_read();
                                                     }catch (std::exception& e){
-                                                        stop();
+							do_read();	
                                                     }
                                                 }
                                             }
-                                            else if (result == request_parser::bad)
+                                            else if (result == message_parser::bad)
                                             {
                                                 stop();
                                             }
@@ -79,7 +80,7 @@ namespace mbus {
                                     });
         }
 
-        void connection::do_write(boost::asio::const_buffer buf)
+        void connection::do_write(std::vector<boost::asio::const_buffer> buf)
         {
             auto self(shared_from_this());
             boost::asio::async_write(socket_, buf,
@@ -99,6 +100,11 @@ namespace mbus {
                                          }
                                      });
         }
+	
+	int connection::get_remote_ip()
+	{
+		return util::ip2long(socket_.remote_endpoint().address().to_string());	
+	}
 
     } // namespace server
 } // namespace mbus

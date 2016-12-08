@@ -7,7 +7,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-
+#include <map>
 #include "connection_manager.hpp"
 #include "../util/util.hpp"
 
@@ -22,7 +22,7 @@ namespace mbus {
         {
             int remote_ip;
             try{
-                remote_ip = util::ip2long(c.socket_.remote_endpoint.address().to_string());
+                remote_ip = c->get_remote_ip();
                 connections_[remote_ip] = c;
                 c->start();
             }catch (std::exception& e){
@@ -33,7 +33,7 @@ namespace mbus {
         void connection_manager::find(int ip, connection_ptr &conn)
         {
             conn = nullptr;
-            map<int, connection_ptr>::iterator iter;
+            std::map<int, connection_ptr>::iterator iter;
             iter = connections_.find(ip);
             if(iter != connections_.end()){
                 conn = iter->second;
@@ -42,9 +42,9 @@ namespace mbus {
 
         void connection_manager::stop(connection_ptr c)
         {
-            std::string remote_ip;
+            int remote_ip;
             try{
-                remote_ip = util::ip2long(c.socket_.remote_endpoint.address().to_string());
+		remote_ip = c->get_remote_ip();
                 connections_.erase(remote_ip);
             }catch (std::exception& e){
                 
@@ -54,7 +54,7 @@ namespace mbus {
 
         void connection_manager::stop_all()
         {
-            map<int,connection_ptr>::iterator it;
+            std::map<int,connection_ptr>::iterator it;
             for(it=connections_.begin(); it!=connections_.end(); ++it) {
                 it->second->stop();
             }

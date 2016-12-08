@@ -33,7 +33,7 @@ namespace mbus {
 
             /// Find the specified connection with ip
 
-            connection_ptr find(int ip);
+            void find(int ip, connection_ptr &conn);
 
             /// Stop the specified connection.
             void stop(connection_ptr c);

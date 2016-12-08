@@ -36,16 +36,6 @@ namespace mbus {
             std::string data;
         };
 
-        std::vector<boost::asio::const_buffer> to_buffers(message& msg, int remote_ip)
-        {
-            std::vector<boost::asio::const_buffer> buffers;
-            buffers.push_back(boost::asio::buffer(std::to_string(msg.header)));
-            buffers.push_back(boost::asio::buffer(std::to_string(msg.data_length)));
-            buffers.push_back(boost::asio::buffer(std::to_string(remote_ip)));
-            buffers.push_back(boost::asio::buffer(msg.data));
-            return buffers;
-        }
-
     } // namespace server
 } // namespace mbus
 

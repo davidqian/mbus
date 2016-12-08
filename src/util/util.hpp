@@ -11,7 +11,7 @@
 #ifndef MBUS_UTIL_HPP
 #define MBUS_UTIL_HPP
 #include <string>
-
+#include <vector>
 namespace mbus {
     namespace util {
     	int ip2long(std::string ip);

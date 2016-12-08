@@ -6,7 +6,6 @@
 //  Copyright (c) 2016年 davidqian. All rights reserved.
 //
 #include "util.hpp"
-
 namespace mbus {
     namespace util {
 
@@ -14,11 +13,11 @@ namespace mbus {
     	{
     		std::vector<std::string> ip_elems = split(ip, ".");
     		int long_ip = 0;
-    		vector<std::string>::iterator it;
+    		std::vector<std::string>::iterator it;
     		int i = 3;
 			for(it=ip_elems.begin();it!=ip_elems.end();it++){
 				int elems = std::stoi(*it);
-				long_ip = long_ip | (elems << (i * 8);
+				long_ip = long_ip | (elems << (i * 8));
 				i--;
 			}
 			return long_ip;
