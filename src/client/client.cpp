@@ -2,10 +2,9 @@
 // Created by playcrab on 1/17/17.
 //
 #include "client.hpp"
-
+#include "message/io_message.hpp"
 
 namespace mbus{
-    namespace client{
         client::client(const std::string &address, const std::string &port)
             :io_service_(),
              stopped_(false),
@@ -13,8 +12,8 @@ namespace mbus{
              deadline_(io_service_),
              heartbeat_timer_(io_service_)
         {
-            boost::asio::tcp::resolver resolver(io_service_);
-            boost::asio::tcp::resolver::query query(address, port);
+            boost::asio::ip::tcp::resolver resolver(io_service_);
+            boost::asio::ip::tcp::resolver::query query(address, port);
             start_connect(resolver.resolve(query));
         }
 
@@ -77,10 +76,7 @@ namespace mbus{
                 unsigned int priority;
                 message_queue::size_type recvd_size;
                 mq.receive(&msg_str, 65536, recvd_size, priority);
-
-                message msg = clientPtr->msg_parser(msg_str);
-
-                clientPtr->add_wirte_queue(msg);
+                clientPtr->add_wirte_queue(msg_str);
             }
         }
 
@@ -107,11 +103,6 @@ namespace mbus{
             }
         }
 
-        void client::add_read_queue(mssage msg)
-        {
-            read_que_.push(msg);
-        }
-
         void client::consume_read_queue_thread(client *clientPtr)
         {
             while(true)
@@ -125,14 +116,13 @@ namespace mbus{
 
         void client::consume_read_queue()
         {
-            message msg;
+            std::string msg;
             if(read_que_.pop(msg)) {
-                string processMsgQueueName = "process_message_queue_" + msg.des_index;
+                string processMsgQueueName = "process_message_queue_" + io_message::get_des_index_from_raw(msg);
                 msg_queue_ptr mq_prt;
-                bool ret =msg_queue_manager_.find_or_add(processMsgQueueName, mq_prt);
+                bool ret = msg_queue_manager_.find_or_add(processMsgQueueName, mq_prt);
                 if(ret){
-                    std::string msg_str = msg.encode_string();
-                    mq_prt->mq.send(msg_str, msg_str.length, 0);
+                    mq_prt->mq.send(msg, msg.length, 0);
                 }
                 //todo err
             } else {
@@ -142,20 +132,20 @@ namespace mbus{
             }
         }
 
-        void client::add_wirte_queue(message msg)
+        void client::add_wirte_queue(std::string& msg)
         {
-            if(msg.src_ip == msg.des_ip){
+            if(ip_ == io_message::get_des_ip_from_raw(msg)){
                 read_que_.push(msg);
             }else {
-                wirte_que_.push(msg.encode());
+                wirte_que_.push(msg);
             }
         }
 
         void client::consume_write_queue()
         {
-            boost::asio::buffer buf;
-            if(wirte_que_.pop(buf)) {
-                start_write(buf);
+            std::string str;
+            if(wirte_que_.pop(str)) {
+                start_write(str);
             } else {
                 std::unique_lock<std::mutex> lk(write_m_);
                 write_cv_.wait(lk, [] {return !wirte_que_.empty();});
@@ -174,11 +164,22 @@ namespace mbus{
             }
         }
 
-        void client::start_write(boost::asio::buffer buf)
+        void client::start_write(std::string &str)
         {
             if (stopped_)
                 return;
 
+            int str_len = str.length();
+            std::string len;
+            len.reserve(4);
+            len.push_back(1, str_len >> 24);
+            len.push_back(1, str_len >> 16);
+            len.push_back(1, str_len >> 8);
+            len.push_back(1, str_len);
+
+            std::vector<boost::asio::const_buffer> buf;
+            buf.push_back(boost::asio::buffer(len));
+            buf.push_back(boost::asio::buffer(str));
 
             boost::system::error_code ec;
             socket_.write_some(buf, ec);
@@ -206,11 +207,11 @@ namespace mbus{
         void client::heart_beat()
         {
             hb_msg_.type = util::HEART_BEAT;
-            hb_msg_.src_ip = ip_;
             hb_msg_.des_index = 0;
+            hb_msg_.src_ip = ip_;
             hb_msg_.src_index = 0;
             hb_msg_.data = "hb";
-            add_wirte_queue(hb_msg_);
+            add_wirte_queue(hb_msg_.encode_string());
         }
 
         void client::check_deadline()
@@ -218,7 +219,7 @@ namespace mbus{
             if (stopped_)
                 return;
 
-            if (deadline_.expires_at() <= deadline_timer::traits_type::now())
+            if (deadline_.expires_at() <= boost::asio::deadline_timer::traits_type::now())
             {
                 socket_.close();
                 deadline_.expires_at(boost::posix_time::pos_infin);
@@ -234,9 +235,8 @@ namespace mbus{
             heartbeat_timer_.cancel();
         }
 
-        void client::get_status()
+        bool client::get_status()
         {
             return stopped_;
         }
-    }
 }

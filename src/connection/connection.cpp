@@ -13,7 +13,6 @@
 #include <vector>
 
 namespace mbus {
-    namespace connection {
 
         connection::connection(boost::asio::ip::tcp::socket socket,
                                connection_manager& manager)
@@ -42,7 +41,7 @@ namespace mbus {
                                     {
                                         if (!ec)
                                         {
-                                            parse_some(connection_manager_.msg_que_, buffer_.data(), bytes_transferred);
+                                            message_parser_.parse_some(connection_manager_.msg_que_, buffer_.data(), bytes_transferred);
                                             do_read();
                                         }
                                         else if (ec != boost::asio::error::operation_aborted)
@@ -52,8 +51,20 @@ namespace mbus {
                                     });
         }
 
-        void connection::do_write(std::vector<boost::asio::const_buffer> buf)
+        void connection::do_write(std::string &str)
         {
+            int str_len = str.length();
+            std::string len;
+            len.reserve(4);
+            len.push_back(1, str_len >> 24);
+            len.push_back(1, str_len >> 16);
+            len.push_back(1, str_len >> 8);
+            len.push_back(1, str_len);
+
+            std::vector<boost::asio::const_buffer> buf;
+            buf.push_back(boost::asio::buffer(len));
+            buf.push_back(boost::asio::buffer(str));
+
             auto self(shared_from_this());
             boost::asio::async_write(socket_, buf,
                                      [this, self](boost::system::error_code ec, std::size_t)
@@ -82,5 +93,4 @@ namespace mbus {
             return long_ip_;
       	}
 
-    } // namespace server
 } // namespace mbus

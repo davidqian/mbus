@@ -19,7 +19,6 @@
 #include "share/msg_queue.hpp"
 #include "share/msg_queue_manager.hpp"
 namespace mbus {
-    namespace client {
         class client
                 : public std::enable_shared_from_this<client>
         {
@@ -33,29 +32,26 @@ namespace mbus {
 
             void run();
 
-            void add_wirte_queue(message msg);
+            void add_wirte_queue(std::string& msg);
 
             void consume_write_queue_thread(client *clentPtr);
 
             void consume_write_queue();
 
-            void add_read_queue(message msg);
-
             void consume_read_queue_thread(client *clientPtr);
 
             void consume_read_queue();
 
-            void get_status();
+            bool get_status();
 
 
         private:
-            void start_connect(boost::asio::tcp::resolver::iterator endpoint_iter);
+            void start_connect(boost::asio::ip::tcp::resolver::iterator endpoint_iter);
             void handle_connect(const boost::system::error_code& ec,
-                                boost::asio::tcp::resolver::iterator endpoint_iter);
-            void start_write(boost::asio::buffer buf);
+                                boost::asio::ip::tcp::resolver::iterator endpoint_iter);
+            void start_write(std::string &str);
             void handle_write(const boost::system::error_code& error);
             void handle_read(const boost::system::error_code& error);
-            void handle_read(const boost::system::error_code& ec);
             void start_read();
             void check_deadline();
             void heart_beat();
@@ -71,8 +67,8 @@ namespace mbus {
             boost::asio::deadline_timer heartbeat_timer_;
             message hb_msg_;
             message msg_;
-            boost::lockfree::queue<message, fixed_sized<false> > wirte_que_;
-            boost::lockfree::queue<message, fixed_sized<false> > read_que_;
+            boost::lockfree::queue<std::string&, boost::lockfree::fixed_sized<false> > wirte_que_;
+            boost::lockfree::queue<std::string&, boost::lockfree::fixed_sized<false> > read_que_;
             std::mutex read_m_;
             std::condition_variable read_cv_;
 
@@ -85,6 +81,5 @@ namespace mbus {
 
             long ip_;
         };
-    }
 }
 #endif //MBUS_CLIENT_HPP

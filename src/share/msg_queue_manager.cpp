@@ -4,7 +4,6 @@
 #include "msg_queue_manager.hpp"
 
 namespace mbus {
-    namespace share {
         bool msg_queue_manager::find_or_add(std::string key, msg_queue_ptr &mq_ptr)
         {
             mq_ptr = nullptr;
@@ -32,5 +31,4 @@ namespace mbus {
         {
             mqs_.erase(key);
         }
-    }
 }

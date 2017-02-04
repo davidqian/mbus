@@ -5,12 +5,10 @@
 #include "msg_queue.hpp"
 
 namespace mbus {
-    namespace share {
         msg_queue::msg_queue(message_queue mq)
                 :mq_(mq)
         {
 
         }
-    }
 }
 

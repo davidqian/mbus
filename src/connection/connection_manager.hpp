@@ -14,11 +14,11 @@
 #include <map>
 #include <ctime>
 #include <boost/lockfree/queue.hpp>
+#include "message/io_message.hpp"
 #include "message/message.hpp"
 #include "connection.hpp"
 
 namespace mbus {
-    namespace connection {
 
 /// Manages open connections so that they may be cleanly stopped when the server
 /// needs to shut down.
@@ -32,7 +32,7 @@ namespace mbus {
             connection_manager();
 
             /// Add the specified connection to the manager and start it.
-            void start(connection_ptr c);
+            void add(connection_ptr c);
 
             /// Find the specified connection with ip
 
@@ -49,7 +49,7 @@ namespace mbus {
             void consume_msg();
 
         public:
-            boost::lockfree::queue<message::message, fixed_sized<false> > msg_que_;
+            boost::lockfree::queue<std::string, boost::lockfree::fixed_sized<false> > msg_que_;
 
             std::mutex msg_m_;
             std::condition_variable msg_cv_;
@@ -59,7 +59,6 @@ namespace mbus {
             std::map<int, connection_ptr> connections_;
         };
 
-    } // namespace server
 } // namespace mbus
 
 #endif // MBUS_CONNECTION_MANAGER_HPP

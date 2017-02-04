@@ -9,16 +9,16 @@
 //
 #include <map>
 #include "connection/connection_manager.hpp"
+#include "message/message_parser.hpp"
 #include "util/util.hpp"
 
 namespace mbus {
-    namespace connection {
 
         connection_manager::connection_manager()
         {
         }
 
-        void connection_manager::start(connection_ptr c)
+        void connection_manager::add(connection_ptr c)
         {
             int remote_ip;
             try{
@@ -74,31 +74,34 @@ namespace mbus {
 
         void connection_manager::consume_msg()
         {
-            message::message msg;
-            if(msg_que_.pop(msg)) {
+            std::string str;
+            if(msg_que_.pop(str)) {
+                message msg = message_parser::parse_string(str);
                 connection_ptr src_ptr;
                 find(msg.src_ip, src_ptr);
                 if(!src_ptr){
                     return;
                 }
-                if(msg.type != message::message::HEARTBEAT){
+
+                if(msg.type != io_message::HEARTBEAT){
                     src_ptr->heartbeat_time_ = time(nullptr);
-                    src_ptr->do_write(msg.encode());
+                    src_ptr->do_write(str);
                     return;
                 }
+
                 connection_ptr des_ptr;
                 find(msg.des_ip, des_ptr);
                 if(des_ptr){
-                    conn_ptr->do_write(msg.encode());
+                    des_ptr->do_write(str);
                 }else{
-                    message::message not_exit_msg;
-                    not_exit_msg.type = message::message::DESIP_NOT_EXIT;
+                    message not_exit_msg;
+                    not_exit_msg.type =io_message::DESIP_NOT_EXIT;
                     not_exit_msg.des_ip = msg.des_ip;
                     not_exit_msg.des_index = msg.des_index;
                     not_exit_msg.src_ip = msg.src_ip;
                     not_exit_msg.src_index = msg.src_index;
                     not_exit_msg.request_id = msg.request_id;
-                    src_ptr->do_write(not_exit_msg.encode());
+                    src_ptr->do_write(not_exit_msg.encode_string());
                 }
             } else {
                 std::unique_lock<std::mutex> lk(msg_m_);
@@ -107,5 +110,4 @@ namespace mbus {
             }
         }
 
-    } // namespace server
 } // namespace mbus

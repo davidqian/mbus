@@ -8,7 +8,6 @@
 #include "msg_queue_manager.hpp"
 using namespace boost::interprocess::ipc;
 namespace mbus {
-    namespace share {
         class msg_queue
                 : public std::enable_shared_from_this<msg_queue>
         {
@@ -22,6 +21,5 @@ namespace mbus {
 
         };
         typedef std::shared_ptr<msg_queue> msg_queue_ptr;
-    }
 }
 #endif //MBUS_MSG_QUEUE_HPP

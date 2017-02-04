@@ -22,7 +22,6 @@
 #include "util/util.hpp"
 
 namespace mbus {
-    namespace connection {
 
 /// Represents a single connection from a client.
         class connection
@@ -50,7 +49,7 @@ namespace mbus {
             void do_read();
 
             /// Perform an asynchronous write operation.
-            void do_write(std::vector<boost::asio::const_buffer> buf);
+            void do_write(std::string &str);
 
             private:
 
@@ -69,7 +68,6 @@ namespace mbus {
 
         typedef std::shared_ptr<connection> connection_ptr;
 
-    } // namespace server
 } // namespace mbus
 
 #endif // MBUS_CONNECTION_HPP

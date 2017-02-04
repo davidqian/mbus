@@ -11,7 +11,6 @@
 #include <utility>
 
 namespace mbus {
-    namespace server {
 
         server::server(const std::string& address, const std::string& port)
                 : io_service_(),
@@ -102,5 +101,4 @@ namespace mbus {
             }
         }
 
-    } // namespace server
 } // namespace mbus

@@ -9,15 +9,13 @@
 #ifndef MBUS_SERVER_HPP
 #define MBUS_SERVER_HPP
 
+#include <string>
 #include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <string>
-#include "connection.hpp"
-#include "connection_manager.hpp"
-#include "message_handler.hpp"
+#include "connection/connection.hpp"
+#include "connection/connection_manager.hpp"
 
 namespace mbus {
-    namespace server {
 
 /// The top-level class of the mbus server.
         class server
@@ -62,7 +60,6 @@ namespace mbus {
             boost::asio::ip::tcp::socket socket_;
         };
 
-    } // namespace server
 } // namespace http
 
 #endif // MBUS_SERVER_HPP

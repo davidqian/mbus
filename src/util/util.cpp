@@ -7,7 +7,6 @@
 //
 #include "util.hpp"
 namespace mbus {
-    namespace util {
 
     	int ip2long(std::string ip)
     	{
@@ -44,5 +43,21 @@ namespace mbus {
 		    return elems;  
 		}
 
-    } // namespace util
+		int chars2int(std::string& str, int begin, int length) {
+			char chars[length];
+			int i = 0;
+			for(i = 0; i < length; i++){
+				chars[i] = str[begin+i];
+			}
+			return bigBys2Uint32(chars);
+		}
+
+		int bigBys2Uint32(const char bys[4]) {
+			int uint = 0;
+			for(int i = 0; i <= 3; i++){
+				uint |= (0xff & bys[i]) << (8*(3-i));
+			}
+			return uint;
+		}
+
 } // namespace mbus
