@@ -1,5 +1,6 @@
 #ifndef MBUS_IO_MESSAGE_HPP
 #define MBUS_IO_MESSAGE_HPP
+#include <string>
 namespace mbus{
     class io_message{
     public:
@@ -12,6 +13,11 @@ namespace mbus{
         std::string body;
 
     public:
+	io_message(const io_message&) = delete;
+        io_message& operator=(const io_message&) = delete;
+        io_message();
+	io_message(io_message && iomsg);	
+
         std::string combination();
         std::string get_body();
 

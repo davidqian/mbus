@@ -1,3 +1,5 @@
+#ifndef MBUS_MESSAGE_HPP
+#define MBUS_MESSAGE_HPP
 
 #include <string>
 #include <vector>
@@ -22,6 +24,7 @@ namespace mbus{
             message(const message&) = delete;
             message& operator=(const message&) = delete;
             message();
-            std::string encode_string();
+            void encode_string(std::string& str);
         };
 }
+#endif

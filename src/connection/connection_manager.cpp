@@ -44,7 +44,7 @@ namespace mbus {
         {
             int remote_ip;
             try{
-		        remote_ip = c->get_remote_ip();
+		remote_ip = c->get_remote_ip();
                 connections_.erase(remote_ip);
             }catch (std::exception& e){
                 
@@ -66,7 +66,7 @@ namespace mbus {
             time_t now = time(nullptr);
             std::map<int,connection_ptr>::iterator it;
             for(it=connections_.begin(); it!=connections_.end(); ++it) {
-                if(now - it->second.heartbeat_time_ > 180){
+                if(now - it->second->heartbeat_time_ > 180){
                     it->second->stop();
                 }
             }
@@ -76,14 +76,15 @@ namespace mbus {
         {
             std::string str;
             if(msg_que_.pop(str)) {
-                message msg = message_parser::parse_string(str);
+		message msg;
+                message_parser::parse_string(str, msg);
                 connection_ptr src_ptr;
                 find(msg.src_ip, src_ptr);
                 if(!src_ptr){
                     return;
                 }
 
-                if(msg.type != io_message::HEARTBEAT){
+                if(msg.type == io_message::HEARTBEAT){
                     src_ptr->heartbeat_time_ = time(nullptr);
                     src_ptr->do_write(str);
                     return;
@@ -101,13 +102,11 @@ namespace mbus {
                     not_exit_msg.src_ip = msg.src_ip;
                     not_exit_msg.src_index = msg.src_index;
                     not_exit_msg.request_id = msg.request_id;
-                    src_ptr->do_write(not_exit_msg.encode_string());
+		    std::string err_str;
+		    not_exit_msg.encode_string(err_str);
+                    src_ptr->do_write(err_str);
                 }
-            } else {
-                std::unique_lock<std::mutex> lk(msg_m_);
-                msg_cv_.wait(lk, [] {return !msg_que_.empty();});
-                msg_cv_.notify_one();
-            }
+            } 
         }
 
 } // namespace mbus

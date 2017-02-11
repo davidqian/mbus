@@ -9,6 +9,7 @@
 //
 
 #include "connection.hpp"
+#include "connection_manager.hpp"
 #include <utility>
 #include <vector>
 
@@ -35,6 +36,7 @@ namespace mbus {
 
         void connection::do_read()
         {
+	    buffer_.data()[0] = '\0';
             auto self(shared_from_this());
             socket_.async_read_some(boost::asio::buffer(buffer_),
                                     [this, self](boost::system::error_code ec, std::size_t bytes_transferred)
@@ -56,10 +58,10 @@ namespace mbus {
             int str_len = str.length();
             std::string len;
             len.reserve(4);
-            len.push_back(1, str_len >> 24);
-            len.push_back(1, str_len >> 16);
-            len.push_back(1, str_len >> 8);
-            len.push_back(1, str_len);
+            len.append(1, str_len >> 24);
+            len.append(1, str_len >> 16);
+            len.append(1, str_len >> 8);
+            len.append(1, str_len);
 
             std::vector<boost::asio::const_buffer> buf;
             buf.push_back(boost::asio::buffer(len));
@@ -69,18 +71,9 @@ namespace mbus {
             boost::asio::async_write(socket_, buf,
                                      [this, self](boost::system::error_code ec, std::size_t)
                                      {
-                                         if (!ec)
-                                         {
-                                             // Initiate graceful connection closure.
-                                             boost::system::error_code ignored_ec;
-                                             socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both,
-                                                              ignored_ec);
-                                         }
-
-                                         if (ec != boost::asio::error::operation_aborted)
+                                         if (ec)
                                          {
                                              connection_manager_.stop(shared_from_this());
-                                             stop();
                                          }
                                      });
         }
@@ -88,7 +81,8 @@ namespace mbus {
       	int connection::get_remote_ip()
       	{
             if(long_ip_ == 0){
-                long_ip_ = util::ip2long(socket_.remote_endpoint().address().to_string());
+		std::string ip_str = socket_.remote_endpoint().address().to_string();
+                long_ip_ = ip2long(ip_str);
             }
             return long_ip_;
       	}

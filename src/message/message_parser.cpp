@@ -10,9 +10,8 @@ namespace mbus{
 
         }
 
-        static message message_parser::parse_string(std::string& str) {
+        void message_parser::parse_string(std::string& str, message& msg) {
             int len = str.length() - 21;
-            message msg;
             msg.type = (int)str[0];
             msg.des_ip = chars2int(str, 1, 4);
             msg.des_index = chars2int(str, 5, 4);
@@ -21,6 +20,5 @@ namespace mbus{
             msg.request_id = chars2int(str, 17, 4);
             msg.data.reserve(len);
             msg.data = str.substr(21, len);
-            return msg;
         }
 }

@@ -11,38 +11,36 @@ namespace mbus{
              data("") {
         }
 
-        std::string message::encode_string() {
-            std::string str;
+        void message::encode_string(std::string& str) {
             str.reserve(21 + data.length());
-            str.push_back(1, type);
-            str.push_back(1,des_ip >> 24);
-            str.push_back(1,des_ip >> 16);
-            str.push_back(1,des_ip >> 8);
-            str.push_back(1,des_ip);
+            str.append(1, type);
 
-            str.push_back(1,des_index >> 24);
-            str.push_back(1,des_index >> 16);
-            str.push_back(1,des_index >> 8);
-            str.push_back(1,des_index);
+            str.append(1,des_ip >> 24);
+            str.append(1,des_ip >> 16);
+            str.append(1,des_ip >> 8);
+            str.append(1,des_ip);
 
-            str.push_back(1,src_ip >> 24);
-            str.push_back(1,src_ip >> 16);
-            str.push_back(1,src_ip >> 8);
-            str.push_back(1,src_ip);
+            str.append(1,des_index >> 24);
+            str.append(1,des_index >> 16);
+            str.append(1,des_index >> 8);
+            str.append(1,des_index);
 
-            str.push_back(1,src_index >> 24);
-            str.push_back(1,src_index >> 16);
-            str.push_back(1,src_index >> 8);
-            str.push_back(1,src_index);
+            str.append(1,src_ip >> 24);
+            str.append(1,src_ip >> 16);
+            str.append(1,src_ip >> 8);
+            str.append(1,src_ip);
 
-            str.push_back(1,request_id >> 24);
-            str.push_back(1,request_id >> 16);
-            str.push_back(1,request_id >> 8);
-            str.push_back(1,request_id);
+            str.append(1,src_index >> 24);
+            str.append(1,src_index >> 16);
+            str.append(1,src_index >> 8);
+            str.append(1,src_index);
 
-            str.push_back(data.c_str());
+            str.append(1,request_id >> 24);
+            str.append(1,request_id >> 16);
+            str.append(1,request_id >> 8);
+            str.append(1,request_id);
 
-            return str;
+            str.append(data.c_str());
         }
 
 }

@@ -3,23 +3,24 @@
 //
 #include "client.hpp"
 #include "message/io_message.hpp"
-
+using namespace boost::interprocess;
 namespace mbus{
         client::client(const std::string &address, const std::string &port)
             :io_service_(),
              stopped_(false),
              socket_(io_service_),
              deadline_(io_service_),
-             heartbeat_timer_(io_service_)
+             heartbeat_timer_(io_service_),
+	     ip_(2130706433)
         {
             boost::asio::ip::tcp::resolver resolver(io_service_);
             boost::asio::ip::tcp::resolver::query query(address, port);
             start_connect(resolver.resolve(query));
         }
 
-        void client::start_connect(boost::asio::tcp::resolver::iterator endpoint_iter)
+        void client::start_connect(boost::asio::ip::tcp::resolver::iterator endpoint_iter)
         {
-            if (endpoint_iter != boost::asio::tcp::resolver::iterator())
+            if (endpoint_iter != boost::asio::ip::tcp::resolver::iterator())
             {
                 deadline_.expires_from_now(boost::posix_time::seconds(60));
 
@@ -39,7 +40,7 @@ namespace mbus{
         }
 
         void client::handle_connect(const boost::system::error_code& ec,
-                                    boost::asio::tcp::resolver::iterator endpoint_iter)
+                                    boost::asio::ip::tcp::resolver::iterator endpoint_iter)
         {
             if (stopped_)
                 return;
@@ -60,17 +61,21 @@ namespace mbus{
                 heartbeat_timer_.expires_from_now(boost::posix_time::seconds(10));
                 heartbeat_timer_.async_wait(boost::bind(&client::heart_beat, this));
 
-                auto receiveThread = new std::thread(client::start_receive_message_queue, this);
-                receiveThread->detach();
+		auto messageQueueThread = new std::thread(client::consume_message_queue_thread, this);
+                messageQueueThread->detach();
 
-                auto consumeThread = new std::thread(client::consume_read_queue_thread, this);
-                consumeThread->detach();
+                auto writeThread = new std::thread(client::consume_write_queue_thread, this);
+                writeThread->detach();
+
+                auto readThread = new std::thread(client::consume_read_queue_thread, this);
+                readThread->detach();
             }
         }
 
-        void client::start_receive_message_queue(client *clientPtr)
+        void client::consume_message_queue_thread(client *clientPtr)
         {
-            message_queue mq(open_or_create_t, "mbus_receive_message_queue", 10000, 65536);
+	    open_or_create_t openOrCreate;
+            message_queue mq(openOrCreate,"mbus_receive_message_queue",10000,65536);
             while(true){
                 std::string msg_str;
                 unsigned int priority;
@@ -80,25 +85,25 @@ namespace mbus{
             }
         }
 
-        void client::start_read(const boost::system::error_code& error)
+        void client::start_read()
         {
-
-            deadline_.expires_from_now(boost::posix_time::seconds(30));
-            socket_.async_read_some(boost::asio::buffer(buffer_),boost::bind(&client::handle_read, this, _1, _2));
+	    buffer_.data()[0] = '\0'; 
+            socket_.async_read_some(boost::asio::buffer(buffer_), boost::bind(&client::handle_read, this, boost::asio::placeholders::error,boost::asio::placeholders::bytes_transferred));
         }
 
-        void client::handle_read(const boost::system::error_code &error,std::size_t bytes_transferred)
+        void client::handle_read(const boost::system::error_code& error,std::size_t bytes_transferred)
         {
             if (stopped_)
                 return;
 
-            if (!ec)
+            if (!error)
             {
                 msg_parser.parse_some(read_que_, buffer_.data(), bytes_transferred);
                 start_read();
             }
-            else
+            else if(error != boost::asio::error::operation_aborted)
             {
+		std::cout << "error code " << error << error.message() << std::endl;
                 stop();
             }
         }
@@ -107,10 +112,10 @@ namespace mbus{
         {
             while(true)
             {
-                if(clentPtr->get_status()){
+                if(clientPtr->get_status()){
                     break;
                 }
-                clentPtr->consume_read_queue();
+                clientPtr->consume_read_queue();
             }
         }
 
@@ -118,17 +123,17 @@ namespace mbus{
         {
             std::string msg;
             if(read_que_.pop(msg)) {
-                string processMsgQueueName = "process_message_queue_" + io_message::get_des_index_from_raw(msg);
-                msg_queue_ptr mq_prt;
-                bool ret = msg_queue_manager_.find_or_add(processMsgQueueName, mq_prt);
-                if(ret){
-                    mq_prt->mq.send(msg, msg.length, 0);
+                std::cout << "msg " << msg << " msg len " << msg.length() << std::endl;
+		int ty = io_message::get_type_from_raw(msg);
+                std::cout << "type = " << ty << std::endl;
+		if(ty != io_message::HEARTBEAT){
+                    string processMsgQueueName = "process_message_queue_" + io_message::get_des_index_from_raw(msg);
+                    msg_queue_ptr mq_ptr;
+                    bool ret = msg_queue_manager_.find_or_add(processMsgQueueName, mq_ptr);
+                    if(ret){
+                        mq_ptr->mq_.send(msg.c_str(), msg.size(), 0);
+                    }
                 }
-                //todo err
-            } else {
-                std::unique_lock<std::mutex> lk(read_m_);
-                read_cv_.wait(lk, [] {return !read_que_.empty();});
-                read_cv_.notify_one();
             }
         }
 
@@ -146,10 +151,6 @@ namespace mbus{
             std::string str;
             if(wirte_que_.pop(str)) {
                 start_write(str);
-            } else {
-                std::unique_lock<std::mutex> lk(write_m_);
-                write_cv_.wait(lk, [] {return !wirte_que_.empty();});
-                write_cv_.notify_one();
             }
         }
 
@@ -168,15 +169,15 @@ namespace mbus{
         {
             if (stopped_)
                 return;
-
             int str_len = str.length();
+	    std::cout << "write str " << str << "str len " << str_len << std::endl;
             std::string len;
             len.reserve(4);
-            len.push_back(1, str_len >> 24);
-            len.push_back(1, str_len >> 16);
-            len.push_back(1, str_len >> 8);
-            len.push_back(1, str_len);
-
+            len.append(1, str_len >> 24);
+            len.append(1, str_len >> 16);
+            len.append(1, str_len >> 8);
+            len.append(1, str_len);
+	    
             std::vector<boost::asio::const_buffer> buf;
             buf.push_back(boost::asio::buffer(len));
             buf.push_back(boost::asio::buffer(str));
@@ -206,12 +207,14 @@ namespace mbus{
 
         void client::heart_beat()
         {
-            hb_msg_.type = util::HEART_BEAT;
+            hb_msg_.type = io_message::HEARTBEAT;
             hb_msg_.des_index = 0;
             hb_msg_.src_ip = ip_;
             hb_msg_.src_index = 0;
             hb_msg_.data = "hb";
-            add_wirte_queue(hb_msg_.encode_string());
+	    std::string hbmsg;
+	    hb_msg_.encode_string(hbmsg);
+            add_wirte_queue(hbmsg);
         }
 
         void client::check_deadline()

@@ -16,12 +16,12 @@
 #include <vector>
 #include <ctime>
 #include <boost/asio.hpp>
-#include "connection_manager.hpp"
 #include "message/message.hpp"
 #include "message/message_parser.hpp"
 #include "util/util.hpp"
 
 namespace mbus {
+	class connection_manager;
 
 /// Represents a single connection from a client.
         class connection
@@ -41,15 +41,15 @@ namespace mbus {
             /// Stop all asynchronous operations associated with the connection.
             void stop();
 
-	        int get_remote_ip();
-
-            time_t heartbeat_time_;
+	    int get_remote_ip();
 
             /// Perform an asynchronous read operation.
             void do_read();
 
             /// Perform an asynchronous write operation.
             void do_write(std::string &str);
+
+            time_t heartbeat_time_;
 
             private:
 
@@ -59,7 +59,7 @@ namespace mbus {
             /// The manager for this connection.
             connection_manager& connection_manager_;
 
-            std::array<char, 8192> buffer_;
+	    std::array<char, 8192> buffer_;
 
             message_parser message_parser_;
 

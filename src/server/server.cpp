@@ -41,11 +41,14 @@ namespace mbus {
 
             do_accept();
 
-            time_.async_wait(boost::bind(&server::heart_beat_timer, this));
+            timer_.async_wait(boost::bind(&server::heart_beat_timer, this));
         }
 
         void server::run()
         {
+	    auto msgThread = new std::thread(server::consume_msg_queue_thread, this);
+            msgThread->detach();
+
             // The io_service::run() call will block until all asynchronous operations
             // have finished. While the server is running, there is always at least one
             // asynchronous operation outstanding: the asynchronous accept call waiting
@@ -58,6 +61,7 @@ namespace mbus {
             acceptor_.async_accept(socket_,
                                    [this](boost::system::error_code ec)
                                    {
+					std::cout << "receive one connector" << std::endl;
                                        // Check whether the server was stopped by a signal before this
                                        // completion handler had a chance to run.
                                        if (!acceptor_.is_open())
@@ -67,7 +71,7 @@ namespace mbus {
 
                                        if (!ec)
                                        {
-                                           connection_manager_.start(std::make_shared<connection>(
+                                           connection_manager_.add(std::make_shared<connection>(
                                                    std::move(socket_), connection_manager_));
                                        }
 
@@ -91,8 +95,8 @@ namespace mbus {
         void server::heart_beat_timer()
         {
             connection_manager_.check_heart_beat();
-            time_.expires_from_now(boost::posix_time::seconds(1));
-            time_.async_wait(boost::bind(&server::heart_beat_timer, this));
+            timer_.expires_from_now(boost::posix_time::seconds(1));
+            timer_.async_wait(boost::bind(&server::heart_beat_timer, this));
         }
 
         void server::consume_msg_queue_thread(server *srv) {

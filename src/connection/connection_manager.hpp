@@ -16,7 +16,8 @@
 #include <boost/lockfree/queue.hpp>
 #include "message/io_message.hpp"
 #include "message/message.hpp"
-#include "connection.hpp"
+#include "share/my_queue.hpp"
+#include "connection/connection.hpp"
 
 namespace mbus {
 
@@ -49,7 +50,7 @@ namespace mbus {
             void consume_msg();
 
         public:
-            boost::lockfree::queue<std::string, boost::lockfree::fixed_sized<false> > msg_que_;
+            my_queue msg_que_;
 
             std::mutex msg_m_;
             std::condition_variable msg_cv_;

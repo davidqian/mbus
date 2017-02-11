@@ -9,6 +9,6 @@
 #include <iostream>
 #include "server/server.hpp"
 int main(int argc, const char * argv[]){
-	mbus::server::server s("0.0.0.0", "9527");
+	mbus::server s("0.0.0.0", "9527");
     s.run();
 }

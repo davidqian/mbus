@@ -10,7 +10,9 @@
 #define MBUS_SERVER_HPP
 
 #include <string>
+#include <thread>
 #include <boost/asio.hpp>
+#include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "connection/connection.hpp"
 #include "connection/connection_manager.hpp"
@@ -33,9 +35,8 @@ namespace mbus {
 
             void heart_beat_timer();
 
-            void consume_msg_queue_thread(server * srv);
+            static void consume_msg_queue_thread(server * srv);
 
-            boost::asio::deadline_timer timer_;
 
         private:
             /// Perform an asynchronous accept operation.
@@ -58,6 +59,8 @@ namespace mbus {
 
             /// The next socket to be accepted.
             boost::asio::ip::tcp::socket socket_;
+
+            boost::asio::deadline_timer timer_;
         };
 
 } // namespace http

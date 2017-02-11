@@ -4,7 +4,7 @@
 #include "msg_queue_manager.hpp"
 
 namespace mbus {
-        bool msg_queue_manager::find_or_add(std::string key, msg_queue_ptr &mq_ptr)
+        bool msg_queue_manager::find_or_add(std::string &key, msg_queue_ptr &mq_ptr)
         {
             mq_ptr = nullptr;
             std::map<std::string, msg_queue_ptr>::iterator iter;
@@ -14,11 +14,8 @@ namespace mbus {
                 return true;
             }else{
                 try{
-                    message_queue mq
-                            (open_only,
-                             key
-                            );
-                    mq_ptr = std::make_shared<msg_queue>(std::move(mq));
+		    open_only_t open;
+                    mq_ptr = std::make_shared<msg_queue>(open, key.c_str());
                     mqs_[key] = mq_ptr;
                     return true;
                 }catch (interprocess_exception &ex){
@@ -27,7 +24,7 @@ namespace mbus {
             }
         }
 
-        void msg_queue_manager::remove(std::string key)
+        void msg_queue_manager::remove(std::string &key)
         {
             mqs_.erase(key);
         }

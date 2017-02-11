@@ -13,10 +13,10 @@
 #include <string>
 #include <vector>
 namespace mbus {
-    	int ip2long(std::string ip);
+    	int ip2long(std::string &ip);
     	std::vector<std::string> split(const std::string& s, const std::string& delim);
-		int chars2int(std::string& str, int begin, int length);
-		int bigBys2Uint32(const char bys[4]);
+	int chars2int(std::string& str, int begin, int length);
+	int bigBys2Uint32(const char bys[4]);
 } // namespace mbus
 
 #endif // MBUS_UTIL_HPP

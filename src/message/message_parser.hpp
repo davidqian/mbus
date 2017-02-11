@@ -1,16 +1,21 @@
+#ifndef MBUS_MESSAGEPARSER_HPP
+#define MBUS_MESSAGEPARSER_HPP
+#include <iostream>
 #include <boost/lockfree/queue.hpp>
 #include "message.hpp"
 #include "io_message.hpp"
+#include "util/util.hpp"
+#include "share/my_queue.hpp"
 
 namespace mbus{
         class message_parser{
         public:
             message_parser();
 
-            static message parse_string(std::string& str);
+            static void parse_string(std::string& str, message& msg);
 
             template <typename InputIterator>
-            void parse_some(boost::lockfree::queue<std::string&, boost::lockfree::fixed_sized<false>> &receiveQueue, InputIterator begin ,std::size_t bufSize){
+            void parse_some(my_queue &receiveQueue, InputIterator begin ,std::size_t bufSize){
                 std::size_t i = 0;
                 while(i < bufSize){
                     if(state_ == lengthEnd){
@@ -23,8 +28,11 @@ namespace mbus{
                             *begin += bufSize - i;
                             i = bufSize;
                         }
+
                         if(msg_.body.length() == msg_.length){
-                            receiveQueue.push(msg_.combination());
+			    std::string str = std::move(msg_.body);
+			    std::cout << "receive str = " << str << std::endl;
+                            receiveQueue.push(str);
                             state_ = length;
                             parsed_chars = 0;
                         }
@@ -32,7 +40,7 @@ namespace mbus{
                         switch (state_){
                             case length:
                                 tmp_parse_str[parsed_chars] = *begin++;
-                                if(parsed_chars == 24){
+                                if(parsed_chars == 3){
                                     msg_.length = bigBys2Uint32(tmp_parse_str);
                                     state_ = lengthEnd;
                                 }
@@ -58,3 +66,4 @@ namespace mbus{
             int parsed_chars;
         };
 }
+#endif
