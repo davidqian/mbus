@@ -1,5 +1,5 @@
-#include "io_message.hpp"
-#include "util/util.hpp"
+#include "io_message.h"
+#include "util.h"
 namespace mbus{
     io_message::io_message()
 	:length(0),
@@ -47,6 +47,10 @@ namespace mbus{
     }
 
     int io_message::get_request_id_from_raw(std::string &msg) {
-	return chars2int(msg, 17, 4);
+        return chars2int(msg, 17, 4);
+    }
+
+    void io_message::get_data_from_raw(std::string &msg, std::string &data) {
+	data = msg.substr(21);	
     }
 }

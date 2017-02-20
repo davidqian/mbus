@@ -5,9 +5,17 @@
 #include "msg_queue.hpp"
 
 namespace mbus {
-	msg_queue::msg_queue(open_only_t open,const char* key)
-	:mq_(open, key)
+	msg_queue::msg_queue(std::string& key)
+	:key_(key)
         {
         }
+
+	msg_queue::~msg_queue(){
+		delete mq_;
+	}
+
+	void msg_queue::open_queue() {
+		mq_ = new message_queue(open_only, key_.c_str());
+	}
 }
 

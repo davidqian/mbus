@@ -74,13 +74,16 @@ namespace mbus{
 
         void client::consume_message_queue_thread(client *clientPtr)
         {
-	    open_or_create_t openOrCreate;
-            message_queue mq(openOrCreate,"mbus_receive_message_queue",10000,65536);
+	    std::string receive_ms_name("mbus_receive_message_queue");
+	    message_queue::remove(receive_ms_name.c_str());
+            message_queue mq(create_only,receive_ms_name.c_str(),100,65535);
             while(true){
                 std::string msg_str;
                 unsigned int priority;
                 message_queue::size_type recvd_size;
-                mq.receive(&msg_str, 65536, recvd_size, priority);
+		msg_str.resize(65535);
+                mq.receive(&msg_str[0], 65535, recvd_size, priority);
+                msg_str.resize((int)recvd_size);
                 clientPtr->add_wirte_queue(msg_str);
             }
         }
@@ -123,15 +126,14 @@ namespace mbus{
         {
             std::string msg;
             if(read_que_.pop(msg)) {
-                std::cout << "msg " << msg << " msg len " << msg.length() << std::endl;
 		int ty = io_message::get_type_from_raw(msg);
-                std::cout << "type = " << ty << std::endl;
 		if(ty != io_message::HEARTBEAT){
-                    string processMsgQueueName = "process_message_queue_" + io_message::get_des_index_from_raw(msg);
+		    int des_index = io_message::get_des_index_from_raw(msg);
+                    std::string processMsgQueueName = "process_message_queue_" + std::to_string(des_index);
                     msg_queue_ptr mq_ptr;
-                    bool ret = msg_queue_manager_.find_or_add(processMsgQueueName, mq_ptr);
+                    bool ret = msg_queue_manager_.find(processMsgQueueName, mq_ptr);
                     if(ret){
-                        mq_ptr->mq_.send(msg.c_str(), msg.size(), 0);
+                        mq_ptr->mq_->send(msg.data(), msg.size(), 0);
                     }
                 }
             }
@@ -170,7 +172,6 @@ namespace mbus{
             if (stopped_)
                 return;
             int str_len = str.length();
-	    std::cout << "write str " << str << "str len " << str_len << std::endl;
             std::string len;
             len.reserve(4);
             len.append(1, str_len >> 24);
