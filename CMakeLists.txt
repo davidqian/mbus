@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-project (./mbus)
+project (mbus)
 
 # Select flags.
 SET(CMAKE_CXX_FLAGS "-std=c++11 -Wall -lstdc++")
@@ -20,21 +20,17 @@ ${CMAKE_CXX_FLAGS_RELEASE}
 # Other flags
 )
 
-add_executable (mbusd
-        src/server.cpp
-        src/server/server.cpp
-        src/connection/connection.cpp
-        src/connection/connection_manager.cpp
-        src/message/message.cpp
-        src/message/message_parser.cpp
-        src/share/msg_queue.cpp
-        src/share/msg_queue_manager.cpp
-        src/util/util.cpp
-        )
-
 add_executable (mbusc
-        src/client.cpp
-        src/client/client.cpp
+        ./src/client.cpp
+        ./src/client/client.cpp
+        ./src/message/message.cpp
+        ./src/message/message_parser.cpp
+	./src/message/io_message.cpp
+	./src/share/my_queue.cpp
+        ./src/share/msg_queue.cpp
+        ./src/share/msg_queue_manager.cpp
+	./src/share/share_memory.cpp
+        ./src/util/util.cpp
         )
 
 #SET(CMAKE_MODULE_LINKER_FLAGS "-pagezero_size 10000 -image_base 100000000")
@@ -48,13 +44,47 @@ else()
     SET(CMAKE_EXE_LINKER_FLAGS "-lpthread -ldl -lrt")
 endif()
 
-target_link_libraries (mbusd
+target_link_libraries (mbusc
         ${BOOST_LIB_DIR}/libboost_locale.a
         ${BOOST_LIB_DIR}/libboost_thread.a
         ${BOOST_LIB_DIR}/libboost_system.a
         )
 
-target_link_libraries(mbusc
+
+
+add_executable (mbusd
+        ./src/server.cpp
+        ./src/server/server.cpp
+        ./src/connection/connection.cpp
+        ./src/connection/connection_manager.cpp
+        ./src/message/message.cpp
+        ./src/message/message_parser.cpp
+        ./src/message/io_message.cpp
+        ./src/share/my_queue.cpp
+        ./src/share/msg_queue.cpp
+        ./src/share/msg_queue_manager.cpp
+        ./src/util/util.cpp
+        )
+
+target_link_libraries(mbusd
+        ${BOOST_LIB_DIR}/libboost_locale.a
+        ${BOOST_LIB_DIR}/libboost_thread.a
+        ${BOOST_LIB_DIR}/libboost_system.a
+        )
+
+add_executable (test
+        ./src/test.cpp
+        ./src/test/test.cpp
+        ./src/message/message.cpp
+        ./src/message/message_parser.cpp
+        ./src/message/io_message.cpp
+        ./src/share/my_queue.cpp
+        ./src/share/msg_queue.cpp
+        ./src/share/msg_queue_manager.cpp
+        ./src/util/util.cpp
+        )
+
+target_link_libraries(test
         ${BOOST_LIB_DIR}/libboost_locale.a
         ${BOOST_LIB_DIR}/libboost_thread.a
         ${BOOST_LIB_DIR}/libboost_system.a

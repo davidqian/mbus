@@ -7,9 +7,8 @@ namespace mbus{
         const static int REQUEST = 0;
         const static int HEARTBEAT = 1;
         const static int DESIP_NOT_EXIT = 2;
-        const static int CLIENT_CRASH = 3;
-        const static int INDEX_CRASH = 4;
-	const static int INDEX_ADD = 5;
+		const static int CLIENT_NOT_CONNECT = 3;
+		const static int UNKONW_ERROR = 4;
 
     public:
         int length;
@@ -32,6 +31,8 @@ namespace mbus{
         static int get_src_index_from_raw(std::string &msg);
 
         static int get_request_id_from_raw(std::string &msg);
+
+	static void get_data_from_raw(std::string &msg, std::string &data);
     };
 }
 #endif

@@ -18,6 +18,7 @@ namespace mbus {
 
             void remove(std::string &key);
             bool find(std::string &key, msg_queue_ptr &mq);
+	    bool find_or_add(std::string &key, msg_queue_ptr &mq);
             void add(std::string &key);
         public:
             std::map<std::string, msg_queue_ptr> mqs_;

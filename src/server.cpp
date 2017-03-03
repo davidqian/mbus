@@ -11,4 +11,5 @@
 int main(int argc, const char * argv[]){
 	mbus::server s("0.0.0.0", "9527");
     s.run();
+    return 0;
 }

@@ -22,6 +22,20 @@ namespace mbus {
 			return long_ip;
     	}
 
+        void int2ip(int iip, std::string &ip) {
+                int ip1 = (iip & (0xff << 24)) >> 24;
+                ip += std::to_string(ip1);
+                ip += ".";
+                int ip2 = (iip & (0xff << 16)) >> 16;
+                ip += std::to_string(ip2);
+                ip += ".";
+                int ip3 = (iip & (0xff << 8)) >> 8;
+                ip += std::to_string(ip3);
+                ip += ".";
+                int ip4 = (iip & 0xff);
+                ip += std::to_string(ip4);
+        }
+
     	std::vector<std::string> split(const std::string& s, const std::string& delim)  
 		{  
 		    std::vector<std::string> elems;  

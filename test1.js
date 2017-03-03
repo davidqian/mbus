@@ -1,26 +1,30 @@
 var http = require('http');
 const mbus = require('./build/Release/mbus');
 
+process.on('exit',function(){
+	console.log("here");
+});
+
 var obj = new mbus.mbusObj();
-console.log("here 1");
-obj.start("127.0.0.1",1,function(requestId, ip, index, data){
+obj.start("127.0.0.1",2,function(type, requestId, ip, index, data){
+	console.log("====================");
 	console.log("requestId=" + requestId);
 	console.log("ip=" + ip);
 	console.log("index=" + index);
 	console.log("data=" + data);
+	console.log("====================");
 });
-console.log("here 2");
 var httpServer = http.createServer(function (request, response) {
-	obj.write("127.0.0.1", 1, 1, "abc");
+	obj.write("127.0.0.1", 1, 1, "from 2");
+
+	response.writeHead(200, {'Content-Type': 'text/plain'});  
+        response.end('ok\n');
 });
-console.log("here 3");
 
 httpServer.on('error', function (err) {
 	console.log("err");
 });
 
-console.log("here 4");
-httpServer.listen(9528, "0.0.0.0", function () {
+httpServer.listen(9529, "0.0.0.0", function () {
 	console.log("http start");
 });
-console.log("here 5");

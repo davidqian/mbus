@@ -49,4 +49,8 @@ namespace mbus{
     int io_message::get_request_id_from_raw(std::string &msg) {
 	return chars2int(msg, 17, 4);
     }
+    
+    void io_message::get_data_from_raw(std::string &msg, std::string &data) {
+        data = msg.substr(21);
+    }
 }

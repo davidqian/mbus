@@ -22,6 +22,7 @@
 #include "share/msg_queue.hpp"
 #include "share/msg_queue_manager.hpp"
 #include "share/my_queue.hpp"
+#include "share/share_memory.hpp"
 
 using namespace boost::interprocess;
 namespace mbus {
@@ -34,7 +35,8 @@ namespace mbus {
 
             /// Construct the server to listen on the specified TCP address and port, and
             /// serve up files from the given directory.
-            explicit client(const std::string& address, const std::string& port);
+            explicit client(const std::string& address, const std::string& port, const std::string& shm_key);
+	        ~client();
 
             void run();
 
@@ -54,10 +56,12 @@ namespace mbus {
             static void consume_message_queue_thread(client *clentPtr);
             static void consume_write_queue_thread(client *clentPtr);
             static void consume_read_queue_thread(client *clientPtr);
+			static void run_io_service_thread(client *clientPtr);
 
             void start_connect(boost::asio::ip::tcp::resolver::iterator endpoint_iter);
             void handle_connect(const boost::system::error_code& ec,
                                 boost::asio::ip::tcp::resolver::iterator endpoint_iter);
+	    void do_await_stop();
             void start_write(std::string& str);
             void start_read();
             void check_deadline();
@@ -67,13 +71,17 @@ namespace mbus {
 
         private:
             bool stopped_;
+			bool socketOpend_;
             boost::asio::io_service io_service_;
             boost::asio::ip::tcp::socket socket_;
+			boost::asio::signal_set signals_;
             std::array<char, 8192> buffer_;
             boost::asio::deadline_timer deadline_;
             boost::asio::deadline_timer heartbeat_timer_;
+
             message hb_msg_;
             message msg_;
+
             my_queue wirte_que_;
             my_queue read_que_;
 
@@ -84,6 +92,8 @@ namespace mbus {
             std::condition_variable write_cv_;
 
             msg_queue_manager msg_queue_manager_;
+
+	        share_memory share_memory_;
 
             message_parser msg_parser;
 

@@ -3,7 +3,8 @@
 //
 #include "client/client.hpp"
 int main(int argc, const char * argv[]){
-        mbus::client c("127.0.0.1", "9527");
+        mbus::client c("127.0.0.1", "9527", "mbus_share_memory");
         c.run();
+        return 0;
 }
 
