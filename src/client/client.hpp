@@ -12,6 +12,7 @@
 #include <boost/asio/write.hpp>
 #include <boost/lockfree/queue.hpp>
 #include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/interprocess/ipc/message_queue.hpp>
 #include <iostream>
 #include <mutex>
@@ -56,31 +57,34 @@ namespace mbus {
             static void consume_message_queue_thread(client *clentPtr);
             static void consume_write_queue_thread(client *clentPtr);
             static void consume_read_queue_thread(client *clientPtr);
-			static void run_io_service_thread(client *clientPtr);
+	    static void run_signal_io_service_thread(client *clientPtr);
 
-            void start_connect(boost::asio::ip::tcp::resolver::iterator endpoint_iter);
-            void handle_connect(const boost::system::error_code& ec,
-                                boost::asio::ip::tcp::resolver::iterator endpoint_iter);
+            void start_connect();
+            void handle_connect(const boost::system::error_code& ec);
 	    void do_await_stop();
             void start_write(std::string& str);
             void start_read();
             void check_deadline();
             void heart_beat();
-            void stop();
+            void stop(bool stopAll);
 
 
         private:
-            bool stopped_;
-			bool socketOpend_;
+	    bool socketOpend_;
+	    bool reconnect_;
             boost::asio::io_service io_service_;
-            boost::asio::ip::tcp::socket socket_;
-			boost::asio::signal_set signals_;
+            boost::asio::io_service signal_io_service_;
+	    boost::shared_ptr<boost::asio::ip::tcp::socket> socket_;
+            boost::asio::ip::tcp::resolver::iterator endpoint_iter_;
+	    boost::asio::signal_set signals_;
             std::array<char, 8192> buffer_;
             boost::asio::deadline_timer deadline_;
             boost::asio::deadline_timer heartbeat_timer_;
 
             message hb_msg_;
             message msg_;
+	    std::string address_;
+	    std::string port_;
 
             my_queue wirte_que_;
             my_queue read_que_;
@@ -93,7 +97,7 @@ namespace mbus {
 
             msg_queue_manager msg_queue_manager_;
 
-	        share_memory share_memory_;
+            share_memory share_memory_;
 
             message_parser msg_parser;
 

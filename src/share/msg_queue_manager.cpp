@@ -34,7 +34,6 @@ namespace mbus {
                 return true;
             }else{
 		try{
-		   std::cout << "key = " << key << std::endl;
                    mq_ptr = std::make_shared<msg_queue>(key);
                    mq_ptr->open_queue();
                    mqs_[key] = mq_ptr;	

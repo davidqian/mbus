@@ -89,6 +89,7 @@ namespace mbus {
                         // call will exit.
                         acceptor_.close();
                         connection_manager_.stop_all();
+			io_service_.stop();
                     });
         }
 

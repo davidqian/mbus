@@ -8,6 +8,8 @@ process.on('exit',function(){
 var received = 0;
 var obj = new mbus.mbusObj();
 obj.start("127.0.0.1",1,function(type, requestId, ip, index, data){
+	console.log("type="+type);
+	console.log("data="+data);
 	received++;
 	console.log(received);
 });

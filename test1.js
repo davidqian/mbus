@@ -15,8 +15,8 @@ obj.start("127.0.0.1",2,function(type, requestId, ip, index, data){
 	console.log("====================");
 });
 var httpServer = http.createServer(function (request, response) {
-	obj.write("127.0.0.1", 1, 1, "from 2");
-
+	var ret = obj.write("127.0.0.1", 1, 1, "from 2");
+	console.log("ret=" + ret);
 	response.writeHead(200, {'Content-Type': 'text/plain'});  
         response.end('ok\n');
 });

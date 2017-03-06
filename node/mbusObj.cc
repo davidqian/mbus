@@ -169,7 +169,7 @@ void mbusObj::afterWork(uv_work_t* req, int status) {
     int type;
 
     if(!request->hasErr) {
-        type = io_message:::get_type_from_raw(request->result);
+        type = io_message::get_type_from_raw(request->result);
 
         int src_ip = io_message::get_src_ip_from_raw(request->result);
         int2ip(src_ip, ip);
@@ -207,8 +207,8 @@ void mbusObj::Exit(const FunctionCallbackInfo<Value>& args) {
 void mbusObj::Write(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = args.GetIsolate();
   mbusObj* obj = ObjectWrap::Unwrap<mbusObj>(args.Holder());
-  if(obj->checkClientWrite()){
 
+  if(obj->checkClientWrite()){
      v8::String::Utf8Value des_ip_v8(args[0]->ToString());
      std::string des_ip = std::string(*des_ip_v8);
      v8::String::Utf8Value param(args[3]->ToString());
