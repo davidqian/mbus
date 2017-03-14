@@ -2,10 +2,6 @@
 // connection_manager.cpp
 // ~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2013 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 #include <map>
 #include "connection/connection_manager.hpp"
@@ -47,7 +43,7 @@ namespace mbus {
 		remote_ip = c->get_remote_ip();
                 connections_.erase(remote_ip);
             }catch (std::exception& e){
-                
+            	std::cout << "connection manager stop " << e.what() << std::endl;    
             }
             c->stop();
         }
@@ -80,6 +76,7 @@ namespace mbus {
                 message_parser::parse_string(str, msg);
                 connection_ptr src_ptr;
                 find(msg.src_ip, src_ptr);
+
                 if(!src_ptr){
                     return;
                 }

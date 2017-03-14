@@ -5,8 +5,65 @@
 //  Created by davidqian on 16/11/29.
 //  Copyright (c) 2016年 davidqian. All rights reserved.
 //
+#include <stdio.h>      
+#include <sys/types.h>
+#include <ifaddrs.h>
+#include <netinet/in.h> 
+#include <arpa/inet.h>
+#include <iostream>
+#include <sstream> 
 #include "util.hpp"
 namespace mbus {
+	void getLocalIp(std::string& ip)
+	{
+		struct ifaddrs * ifAddrStruct=NULL;
+    		struct ifaddrs * ifa=NULL;
+    		void * tmpAddrPtr=NULL;
+
+    		getifaddrs(&ifAddrStruct);
+
+    		for (ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next) {
+    			if (!ifa->ifa_addr) {
+            			continue;
+        		}
+        		if (ifa->ifa_addr->sa_family == AF_INET) {
+       	    			tmpAddrPtr=&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
+            			char addressBuffer[INET_ADDRSTRLEN];
+            			inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+				if(isLAN(addressBuffer)){
+					ip = addressBuffer;
+					break;
+				}
+        		}
+			/**
+			 else if (ifa->ifa_addr->sa_family == AF_INET6) {
+            			tmpAddrPtr=&((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
+            			char addressBuffer[INET6_ADDRSTRLEN];
+            			inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
+				ip = addressBuffer;
+        		} 
+			**/
+    		}
+    		if (ifAddrStruct!=NULL) freeifaddrs(ifAddrStruct);
+	}
+
+	bool isLAN(const std::string& ipstring)  
+	{  
+    		std::istringstream st(ipstring);  
+    		int ip[2];  
+    		for(int i = 0; i < 2; i++)  
+    		{  
+        		std::string temp;  
+        		getline(st,temp,'.');  
+        		std::istringstream a(temp);  
+        		a >> ip[i];  
+    		}  
+    		if((ip[0]==10) || (ip[0]==172 && ip[1]>=16 && ip[1]<=31) || (ip[0]==192 && ip[1]==168)){
+        		return true;  
+		}else{
+    			return false;  
+		}
+	}
 
     	int ip2long(std::string &ip)
     	{

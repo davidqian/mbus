@@ -5,15 +5,9 @@
 #include "share_memory.hpp"
 
 namespace mbus {
-	share_memory::share_memory(const std::string& key)
-	:key_(key),
-	shm_opened_(false)
-        {
-        }
+	share_memory::share_memory(const std::string& key):key_(key),shm_opened_(false){}
 
-	share_memory::share_memory():key_(""),shm_opened_(false)
-	{
-	}
+	share_memory::share_memory():key_(""),shm_opened_(false){}
 
 	share_memory::~share_memory(){
 		delete mmap_;
@@ -28,12 +22,12 @@ namespace mbus {
 		shm_ = new shared_memory_object(open_or_create, key_.c_str(), read_write);
 		shm_->truncate (10000);
 		mmap_ = new mapped_region(*shm_, read_write);
-                shm_opened_ = true;
+    shm_opened_ = true;
 	}
-	
+
 	void share_memory::set_memory(int index, int data) {
 		if(shm_opened_){
-			std::memset(mmap_->get_address()+index, data, 1);	
+			std::memset(mmap_->get_address()+index, data, 1);
 		}
 	}
 
@@ -46,4 +40,3 @@ namespace mbus {
 		}
 	}
 }
-

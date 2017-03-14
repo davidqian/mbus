@@ -7,8 +7,8 @@ namespace mbus{
         const static int REQUEST = 0;
         const static int HEARTBEAT = 1;
         const static int DESIP_NOT_EXIT = 2;
-		const static int CLIENT_NOT_CONNECT = 3;
-		const static int UNKONW_ERROR = 4;
+	const static int CLIENT_NOT_CONNECT = 3;
+	const static int UNKONW_ERROR = 4;
 
     public:
         int length;

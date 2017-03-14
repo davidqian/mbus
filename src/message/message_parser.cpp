@@ -2,10 +2,7 @@
 #include "message.hpp"
 #include "util/util.hpp"
 namespace mbus{
-        message_parser::message_parser()
-            :state_(length),
-             msg_(),
-             parsed_chars(0)
+        message_parser::message_parser():state_(length),msg_(),parsed_chars(0)
         {
 
         }

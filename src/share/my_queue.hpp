@@ -19,12 +19,11 @@ namespace mbus {
 
 	    void push(std::string &str);
 	    bool pop(std::string &str);
-	    bool shipment_available();
 
         public:
+	     int max_queue_len_;
              std::queue<std::string> queue_;
-	     std::mutex pushm_;
-	     std::mutex popm_;
+	     std::mutex m_;
 	     std::condition_variable cv_;
         };
 }

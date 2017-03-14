@@ -17,36 +17,36 @@ using namespace boost::interprocess;
 namespace mbus {
         class test
         {
-        public:
+          public:
             test(const test&) = delete;
             test& operator=(const test&) = delete;
 
             /// Construct the server to listen on the specified TCP address and port, and
             /// serve up files from the given directory.
             test(int index);
-	    ~test();
+	          ~test();
 
-	    void run();
-	    
-	    void consume_read_queue();
+	          void run();
 
-	    void write(std::string &msg);
+	          void consume_read_queue();
+
+	          void write(std::string &msg);
 
         private:
             static void consume_read_queue_thread(test *testPtr);
 
         private:
-	    message_queue* write_mq_;
-	    message_queue* read_mq_;
+      	    message_queue* write_mq_;
+      	    message_queue* read_mq_;
 
             std::mutex read_m_;
             std::condition_variable read_cv_;
 
             std::mutex write_m_;
             std::condition_variable write_cv_;
-	    
+
 	    int index_;
             int ip_;
-        };
+    };
 }
 #endif //MBUS_CLIENT_HPP

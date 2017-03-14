@@ -18,6 +18,8 @@ namespace mbus {
     	std::vector<std::string> split(const std::string& s, const std::string& delim);
 	int chars2int(std::string& str, int begin, int length);
 	int bigBys2Uint32(const char bys[4]);
+	void getLocalIp(std::string& ip);
+	bool isLAN(const std::string& ipstring);
 } // namespace mbus
 
 #endif // MBUS_UTIL_HPP

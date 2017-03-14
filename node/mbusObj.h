@@ -36,20 +36,21 @@ class mbusObj : public node::ObjectWrap {
   void startReadMq();
   void stop();
   bool checkClientWrite();
+  static void singnalThread(mbusObj * mbusObjPtr);
 
  private:
     explicit mbusObj();
     ~mbusObj();
-
+  
   static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void Write(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void Exit(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void Start(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void GetIp(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   static void onWork(uv_work_t* req);
   static void afterWork(uv_work_t* req, int status);
 
-  static void singnalThread(mbusObj * mbusObjPtr);
   static v8::Persistent<v8::Function> constructor;
 
   private:

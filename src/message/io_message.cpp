@@ -1,14 +1,11 @@
 #include "io_message.hpp"
 #include "util/util.hpp"
 namespace mbus{
-    io_message::io_message()
-	:length(0),
-         body(""){
-	}
-    io_message::io_message(io_message&& iomsg)
-    :length(iomsg.length),
-     body(std::move(iomsg.body)){
-	iomsg.body = nullptr;
+    io_message::io_message():length(0),body(""){
+	   }
+
+    io_message::io_message(io_message&& iomsg):length(iomsg.length),body(std::move(iomsg.body)){
+	     iomsg.body = nullptr;
     }
 
     std::string io_message::combination() {
@@ -27,7 +24,7 @@ namespace mbus{
     }
 
     int io_message::get_type_from_raw(std::string &msg) {
-	return (int)msg[0];
+	     return (int)msg[0];
     }
 
     int io_message::get_des_ip_from_raw(std::string &msg) {
@@ -47,9 +44,9 @@ namespace mbus{
     }
 
     int io_message::get_request_id_from_raw(std::string &msg) {
-	return chars2int(msg, 17, 4);
+	     return chars2int(msg, 17, 4);
     }
-    
+
     void io_message::get_data_from_raw(std::string &msg, std::string &data) {
         data = msg.substr(21);
     }
