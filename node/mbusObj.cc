@@ -1,5 +1,6 @@
 #include <uv.h>
 #include <map>
+#include <time.h>
 #include "mbusObj.h"
 #include "message/message.hpp"
 #include "message/io_message.hpp"
@@ -21,6 +22,7 @@ using v8::HandleScope;
 using v8::CopyablePersistentTraits;
 
 using namespace boost::interprocess;
+using namespace std;
 namespace mbus {
 
 static Persistent<Function, CopyablePersistentTraits<Function>> callback;
@@ -48,12 +50,13 @@ void mbusObj::initObjData(int ip, int index)
 {
     ip_ = ip;
     index_ = index;
-    std::string key("mbus_share_memory");
+    std::string key(mbus::MBUS_SHARE_MEMORY_KEY);
     share_memory_.set_key(key);
     share_memory_.open_share_memory();
     share_memory_.set_memory(index_,1);
 
-    std::string read_mq_name = "process_message_queue_"+std::to_string(index_);
+    std::string read_mq_name = mbus::PROCESS_MSG_QUEUE_KEY + std::to_string(index_);
+    message_queue::remove(read_mq_name.c_str());
     read_mq_ = new message_queue(open_or_create, read_mq_name.c_str(), 10000, 65535);
 }
 
@@ -61,7 +64,7 @@ bool mbusObj::checkClientWrite()
 {
     if(share_memory_.get_memory(0) == 1) {
         if (!shm_opend_) {
-            write_mq_ = new message_queue(open_only, "mbus_receive_message_queue");
+            write_mq_ = new message_queue(open_only, mbus::CLIENT_MSG_QUEUE_KEY);
             shm_opend_ = true;
         }
         return true;
@@ -70,17 +73,26 @@ bool mbusObj::checkClientWrite()
     }
 }
 
+bool mbusObj::checkProcess(int index)
+{
+  if(share_memory_.get_memory(index) == 1) {
+      return true;
+  }else{
+      return false;
+  }
+}
+
 void mbusObj::stop()
 {
-    share_memory_.set_memory(index_,0);  
+    share_memory_.set_memory(index_,0);
     if(!io_service_.stopped()){
         io_service_.stop();
     }
-    message_queue::remove("mbus_receive_message_queue");
+    message_queue::remove(mbus::CLIENT_MSG_QUEUE_KEY);
 }
 
 void mbusObj::singnalThread(mbusObj * mbusObjPtr) {
-	mbusObjPtr->io_service_.run();	
+	mbusObjPtr->io_service_.run();
 }
 
 void mbusObj::Init(Local<Object> exports) {
@@ -136,7 +148,7 @@ void mbusObj::Start(const FunctionCallbackInfo<Value>& args) {
     request->mbusObjPtr = obj;
     request->hasErr = false;
     uv_work_t* req = new uv_work_t();
-    req->data = request; 
+    req->data = request;
 
     uv_queue_work(uv_default_loop(), req, mbusObj::onWork, mbusObj::afterWork);
 
@@ -145,10 +157,10 @@ void mbusObj::Start(const FunctionCallbackInfo<Value>& args) {
 
 void mbusObj::GetIp(const FunctionCallbackInfo<Value>& args) {
 	Isolate* isolate = args.GetIsolate();
-    	mbusObj* obj = ObjectWrap::Unwrap<mbusObj>(args.Holder());
+  mbusObj* obj = ObjectWrap::Unwrap<mbusObj>(args.Holder());
 	std::string ip;
 	int2ip(obj->ip_, ip);
-	args.GetReturnValue().Set(String::NewFromUtf8(isolate, ip.data()));	
+	args.GetReturnValue().Set(String::NewFromUtf8(isolate, ip.data()));
 }
 
 void mbusObj::onWork(uv_work_t* req) {
@@ -189,7 +201,6 @@ void mbusObj::afterWork(uv_work_t* req, int status) {
         src_index = io_message::get_src_index_from_raw(request->result);
         request_id = io_message::get_request_id_from_raw(request->result);
         io_message::get_data_from_raw(request->result, data);
-
     }else{
         type = io_message::UNKONW_ERROR;
         ip = "127.0.0.1";
@@ -220,29 +231,29 @@ void mbusObj::Write(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = args.GetIsolate();
   mbusObj* obj = ObjectWrap::Unwrap<mbusObj>(args.Holder());
 
+  int hasErr = 0;
   if(obj->checkClientWrite()){
-     v8::String::Utf8Value des_ip_v8(args[0]->ToString());
-     std::string des_ip = std::string(*des_ip_v8);
-     int desIp = args[1]->NumberValue();
-     int requestId = args[2]->NumberValue();
-     v8::String::Utf8Value param(args[3]->ToString());
-
-     message msg;
-     msg.type = io_message::REQUEST;
-     msg.des_ip = ip2long(des_ip);
-     msg.des_index = desIp;
-     msg.src_ip = obj->ip_;
-     msg.src_index = obj->index_;
-     msg.request_id = requestId;
-     msg.data = std::string(*param);
-     std::string m;
-     msg.encode_string(m); 
-
-     obj->write_mq_->send(m.data(), m.size(), 0);
-     args.GetReturnValue().Set(Number::New(isolate, 1));
+      v8::String::Utf8Value des_ip_v8(args[0]->ToString());
+      std::string argDesIp = std::string(*des_ip_v8);
+      int des_ip = ip2long(argDesIp);
+      int desIndex = args[1]->NumberValue();
+      int requestId = args[2]->NumberValue();
+      v8::String::Utf8Value param(args[3]->ToString());
+      message msg;
+      msg.type = io_message::REQUEST;
+      msg.des_ip = des_ip;
+      msg.des_index = desIndex;
+      msg.src_ip = obj->ip_;
+      msg.src_index = obj->index_;
+      msg.request_id = requestId;
+      msg.data = std::string(*param);
+      std::string m;
+      msg.encode_string(m);
+      obj->write_mq_->send(m.data(), m.size(), 0);
   }else{
+     hasErr = 1;
      obj->shm_opend_ = false;
-     args.GetReturnValue().Set(Number::New(isolate, 0));
   }
-}
+    args.GetReturnValue().Set(Number::New(isolate, hasErr));
+  }
 }  // namespace demo

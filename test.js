@@ -7,15 +7,13 @@ mbus.on('message',function(err, type, srcIp, index, data){
 		console.log('error=' + err.stack.toString());
 	}else{
 		console.log("receive from " + data);
-		//mbus.write(srcIp,index,"from 1");
 	}
 });
 
 var httpServer = http.createServer(function (request, response) {
 	var str = 'from 1 ' + i;
 	mbus.write("172.16.100.253", 2, str, 100, function(err, type, ip, index, data){
-		console.log(data);
-		response.writeHead(200, {'Content-Type': 'text/plain'});  
+		response.writeHead(200, {'Content-Type': 'text/plain'});
         	response.end(data+'\n');
 	});
 	i++;

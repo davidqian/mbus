@@ -11,6 +11,8 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/interprocess/ipc/message_queue.hpp>
 #include "share/share_memory.hpp"
+#include "share/msg_queue.hpp"
+#include "share/msg_queue_manager.hpp"
 
 using v8::Context;
 using v8::Function;
@@ -36,12 +38,13 @@ class mbusObj : public node::ObjectWrap {
   void startReadMq();
   void stop();
   bool checkClientWrite();
+  bool checkProcess(int index);
   static void singnalThread(mbusObj * mbusObjPtr);
 
  private:
     explicit mbusObj();
     ~mbusObj();
-  
+
   static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void Write(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void Exit(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -57,10 +60,13 @@ class mbusObj : public node::ObjectWrap {
     boost::asio::io_service io_service_;
     int ip_;
     int index_;
+    std::string processMsgQueueName_;
 
     message_queue* write_mq_;
     message_queue* read_mq_;
     share_memory share_memory_;
+
+    msg_queue_manager msg_queue_manager_;
 
     bool shm_opend_;
 };

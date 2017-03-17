@@ -2,13 +2,16 @@
 // Created by playcrab on 1/17/17.
 //
 #include <signal.h>
+#include <time.h>
 #include <thread>
 #include "client.hpp"
 #include "message/io_message.hpp"
+#include "util/util.hpp"
+
 using namespace boost::interprocess;
 namespace mbus{
   client::client(const std::string &address, const std::string &port, const int ip, const std::string &shm_key)
-      :io_service_(),signal_io_service_(),address_(address), port_(port),socketOpend_(false),reconnect_(true),deadline_(io_service_), signals_(signal_io_service_), heartbeat_timer_(io_service_), ip_(ip),processMsgQueueName_("process_message_queue_"),share_memory_(shm_key)
+      :io_service_(),signal_io_service_(),address_(address), port_(port),socketOpend_(false),reconnect_(true),deadline_(io_service_), signals_(signal_io_service_), heartbeat_timer_(io_service_), ip_(ip),share_memory_(shm_key)
   {
       signals_.add(SIGINT);
       signals_.add(SIGTERM);
@@ -95,10 +98,11 @@ namespace mbus{
       auto writeThread = new std::thread(client::consume_write_queue_thread, this);
       writeThread->detach();
 
-      for(int i =0; i++; i<4){
-        auto readThread = new std::thread(client::consume_read_queue_thread, this);
-        readThread->detach();
-      }
+      auto readThread = new std::thread(client::consume_read_queue_thread, this);
+      readThread->detach();
+
+      auto readThread1 = new std::thread(client::consume_read_queue_thread, this);
+      readThread1->detach();
 
       auto ioServiceThread = new std::thread(client::run_signal_io_service_thread, this);
       ioServiceThread->join();
@@ -113,7 +117,8 @@ namespace mbus{
 
   void client::consume_message_queue_thread(client *clientPtr)
   {
-      std::string receive_ms_name("mbus_receive_message_queue");
+      std::string receive_ms_name(mbus::CLIENT_MSG_QUEUE_KEY);
+      message_queue::remove(receive_ms_name.c_str());
       message_queue mq(open_or_create,receive_ms_name.c_str(),10000,65535);
       while(true){
           std::string msg_str;
@@ -168,7 +173,7 @@ namespace mbus{
           std::string processKey;
           if(ty != io_message::HEARTBEAT){
               des_index = io_message::get_des_index_from_raw(msg);
-              processKey = processMsgQueueName_ + std::to_string(des_index);
+              processKey = mbus::PROCESS_MSG_QUEUE_KEY + std::to_string(des_index);
               bool sendErr = true;
               if(share_memory_.get_memory(des_index) == 1){
                   msg_queue_ptr mq_ptr;
@@ -285,7 +290,7 @@ namespace mbus{
          signal_io_service_.stop();
          deadline_.cancel();
          heartbeat_timer_.cancel();
-         socket_->close();
+         //socket_->close();
       }
       socketOpend_ = false;
       io_service_.stop();

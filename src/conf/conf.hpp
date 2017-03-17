@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 namespace mbus {
-   class conf {
+class conf {
 	public:
     		static conf * getInstance() {
         		static conf * instance = nullptr;
@@ -37,7 +37,7 @@ namespace mbus {
     		int threadCount_;
     		string iniPath_;
     		string callbackUrl_;
-	};	
+	};
 } // namespace mbus
 
 #endif // MBUS_CONF_HPP

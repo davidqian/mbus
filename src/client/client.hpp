@@ -83,8 +83,6 @@ namespace mbus {
 	         std::string address_;
 	         std::string port_;
 
-           std::processMsgQueueName_;
-
            my_queue wirte_que_;
            my_queue read_que_;
 

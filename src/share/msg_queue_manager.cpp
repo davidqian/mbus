@@ -2,7 +2,7 @@
 // Created by david on 1/20/17.
 //
 #include "msg_queue_manager.hpp"
-#include "message/message.hpp";
+#include "message/message.hpp"
 
 namespace mbus {
 	msg_queue_manager::msg_queue_manager(){}
