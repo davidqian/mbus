@@ -13,9 +13,9 @@
 #include <string>
 #include <vector>
 namespace mbus {
-  const std::string CLIENT_MSG_QUEUE_KEY = "mbus_receive_message_queue";
-  const std::string PROCESS_MSG_QUEUE_KEY = "process_message_queue_";
-  const std::string MBUS_SHARE_MEMORY_KEY = "mbus_share_memory";
+  const char* CLIENT_MSG_QUEUE_KEY = "mbus_receive_message_queue";
+  const char* PROCESS_MSG_QUEUE_KEY = "process_message_queue_";
+  const char* MBUS_SHARE_MEMORY_KEY = "mbus_share_memory";
 
   int ip2long(std::string &ip);
   void int2ip(int iip, std::string &ip);

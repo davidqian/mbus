@@ -173,7 +173,7 @@ namespace mbus{
           std::string processKey;
           if(ty != io_message::HEARTBEAT){
               des_index = io_message::get_des_index_from_raw(msg);
-              processKey = mbus::PROCESS_MSG_QUEUE_KEY + std::to_string(des_index);
+              processKey = std::string(mbus::PROCESS_MSG_QUEUE_KEY) + std::to_string(des_index);
               bool sendErr = true;
               if(share_memory_.get_memory(des_index) == 1){
                   msg_queue_ptr mq_ptr;

@@ -55,7 +55,7 @@ void mbusObj::initObjData(int ip, int index)
     share_memory_.open_share_memory();
     share_memory_.set_memory(index_,1);
 
-    std::string read_mq_name = mbus::PROCESS_MSG_QUEUE_KEY + std::to_string(index_);
+    std::string read_mq_name = std::string(mbus::PROCESS_MSG_QUEUE_KEY) + std::to_string(index_);
     message_queue::remove(read_mq_name.c_str());
     read_mq_ = new message_queue(open_or_create, read_mq_name.c_str(), 10000, 65535);
 }
