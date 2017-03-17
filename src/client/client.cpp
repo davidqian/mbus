@@ -20,7 +20,6 @@ namespace mbus{
       #endif
       do_await_stop();
   }
-
 	client::~client() {
 	}
 
@@ -105,9 +104,9 @@ namespace mbus{
       readThread1->detach();
 
       auto ioServiceThread = new std::thread(client::run_signal_io_service_thread, this);
-      ioServiceThread->join();
+      ioServiceThread->detach();
 
-      //start_connect();
+      start_connect();
   }
 
   void client::run_signal_io_service_thread(client *clientPtr)

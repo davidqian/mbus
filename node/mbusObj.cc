@@ -228,32 +228,32 @@ void mbusObj::Exit(const FunctionCallbackInfo<Value>& args) {
 }
 
 void mbusObj::Write(const FunctionCallbackInfo<Value>& args) {
-  Isolate* isolate = args.GetIsolate();
-  mbusObj* obj = ObjectWrap::Unwrap<mbusObj>(args.Holder());
+    Isolate* isolate = args.GetIsolate();
+    mbusObj* obj = ObjectWrap::Unwrap<mbusObj>(args.Holder());
 
-  int hasErr = 0;
-  if(obj->checkClientWrite()){
-      v8::String::Utf8Value des_ip_v8(args[0]->ToString());
-      std::string argDesIp = std::string(*des_ip_v8);
-      int des_ip = ip2long(argDesIp);
-      int desIndex = args[1]->NumberValue();
-      int requestId = args[2]->NumberValue();
-      v8::String::Utf8Value param(args[3]->ToString());
-      message msg;
-      msg.type = io_message::REQUEST;
-      msg.des_ip = des_ip;
-      msg.des_index = desIndex;
-      msg.src_ip = obj->ip_;
-      msg.src_index = obj->index_;
-      msg.request_id = requestId;
-      msg.data = std::string(*param);
-      std::string m;
-      msg.encode_string(m);
-      obj->write_mq_->send(m.data(), m.size(), 0);
-  }else{
-     hasErr = 1;
-     obj->shm_opend_ = false;
-  }
+    int hasErr = 0;
+    if(obj->checkClientWrite()){
+        v8::String::Utf8Value des_ip_v8(args[0]->ToString());
+        std::string argDesIp = std::string(*des_ip_v8);
+        int des_ip = ip2long(argDesIp);
+        int desIndex = args[1]->NumberValue();
+        int requestId = args[2]->NumberValue();
+        v8::String::Utf8Value param(args[3]->ToString());
+        message msg;
+        msg.type = io_message::REQUEST;
+        msg.des_ip = des_ip;
+        msg.des_index = desIndex;
+        msg.src_ip = obj->ip_;
+        msg.src_index = obj->index_;
+        msg.request_id = requestId;
+        msg.data = std::string(*param);
+        std::string m;
+        msg.encode_string(m);
+        obj->write_mq_->send(m.data(), m.size(), 0);
+    }else{
+       hasErr = 1;
+       obj->shm_opend_ = false;
+    }
     args.GetReturnValue().Set(Number::New(isolate, hasErr));
   }
 }  // namespace demo
