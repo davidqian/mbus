@@ -41,7 +41,7 @@ namespace mbus {
             /// Stop all asynchronous operations associated with the connection.
             void stop();
 
-	    int get_remote_ip();
+	    			int get_remote_ip();
 
             /// Perform an asynchronous read operation.
             void do_read();
@@ -59,7 +59,7 @@ namespace mbus {
             /// The manager for this connection.
             connection_manager& connection_manager_;
 
-	    std::array<char, 8192> buffer_;
+	    			std::array<char, 8192> buffer_;
 
             message_parser message_parser_;
 

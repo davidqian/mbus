@@ -40,10 +40,10 @@ namespace mbus {
         {
             int remote_ip;
             try{
-		remote_ip = c->get_remote_ip();
+		            remote_ip = c->get_remote_ip();
                 connections_.erase(remote_ip);
             }catch (std::exception& e){
-            	std::cout << "connection manager stop " << e.what() << std::endl;    
+            	std::cout << "connection manager stop " << e.what() << std::endl;
             }
             c->stop();
         }
@@ -72,7 +72,7 @@ namespace mbus {
         {
             std::string str;
             if(msg_que_.pop(str)) {
-		message msg;
+		            message msg;
                 message_parser::parse_string(str, msg);
                 connection_ptr src_ptr;
                 find(msg.src_ip, src_ptr);
@@ -99,11 +99,11 @@ namespace mbus {
                     not_exit_msg.src_ip = msg.src_ip;
                     not_exit_msg.src_index = msg.src_index;
                     not_exit_msg.request_id = msg.request_id;
-		    std::string err_str;
-		    not_exit_msg.encode_string(err_str);
+		                std::string err_str;
+		                not_exit_msg.encode_string(err_str);
                     src_ptr->do_write(err_str);
                 }
-            } 
+            }
         }
 
 } // namespace mbus

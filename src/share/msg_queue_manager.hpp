@@ -13,8 +13,8 @@ namespace mbus {
         class msg_queue_manager
         {
         public:
-	    explicit msg_queue_manager(); 
-	    ~msg_queue_manager();
+	          explicit msg_queue_manager(); 
+	          ~msg_queue_manager();
 
             void remove(std::string &key);
             bool find(std::string &key, msg_queue_ptr &mq);

@@ -30,7 +30,7 @@ namespace mbus{
                         }
 
                         if(msg_.body.length() == msg_.length){
-			    std::string str = std::move(msg_.body);
+			                      std::string str = std::move(msg_.body);
                             receiveQueue.push(str);
                             state_ = length;
                             parsed_chars = 0;

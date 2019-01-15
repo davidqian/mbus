@@ -12,12 +12,9 @@ namespace mbus{
             int type;
             int des_ip;
             int des_index;
-
             int src_ip;
             int src_index;
-
             int request_id;
-
             std::string data;
 
         public:

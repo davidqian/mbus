@@ -36,7 +36,7 @@ namespace mbus {
 
         void connection::do_read()
         {
-	    buffer_.data()[0] = '\0';
+	          buffer_.data()[0] = '\0';
             auto self(shared_from_this());
             socket_.async_read_some(boost::asio::buffer(buffer_),
                                     [this, self](boost::system::error_code ec, std::size_t bytes_transferred)
@@ -77,11 +77,11 @@ namespace mbus {
                                          }
                                      });
         }
-	
+
       	int connection::get_remote_ip()
       	{
             if(long_ip_ == 0){
-		std::string ip_str = socket_.remote_endpoint().address().to_string();
+		            std::string ip_str = socket_.remote_endpoint().address().to_string();
                 long_ip_ = ip2long(ip_str);
             }
             return long_ip_;

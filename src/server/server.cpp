@@ -42,9 +42,8 @@ namespace mbus {
 
         void server::run()
         {
-	    auto msgThread = new std::thread(server::consume_msg_queue_thread, this);
+	          auto msgThread = new std::thread(server::consume_msg_queue_thread, this);
             msgThread->detach();
-
             io_service_.run();
         }
 
@@ -75,7 +74,7 @@ namespace mbus {
                     {
                         acceptor_.close();
                         connection_manager_.stop_all();
-			io_service_.stop();
+			                  io_service_.stop();
                     });
         }
 
